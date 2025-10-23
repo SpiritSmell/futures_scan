@@ -3,3 +3,5 @@ config.json
 *.log
 __pycache__/
 *.pyc
+crypto_scan/
+venv/
