@@ -1,0 +1,8 @@
+services:
+  sap-odata:
+    image: docker-registry-dev.eurasia.kz/sap-odata:latest
+    container_name: sap-odata
+    environment:
+      config: "./data/FBL5N.cfg"
+    volumes:
+      - ./data:/app/data

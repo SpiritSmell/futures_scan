@@ -1,0 +1,24 @@
+{
+  "rabbitmq": {
+    "host": "192.168.192.42",
+    "port": 5672,
+    "user": "rmuser",
+    "password": "rmpassword",
+    "exchange": "futures_data"
+  },
+  "exchanges": ["bitget", "bybit", "binance", "htx", "gateio"],
+  "symbols": [
+    "BTC/USDT:USDT",
+    "ETH/USDT:USDT"
+  ],
+  "collection": {
+    "interval_seconds": 5,
+    "retry_attempts": 3,
+    "retry_delays": [1, 2, 4]
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file": "app.log"
+  },
+  "api_keys_file": ".env.keys"
+}

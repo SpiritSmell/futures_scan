@@ -1,0 +1,9 @@
+#!/bin/bash
+# получаем в переменную $PROJECT_NAME имя проекта при помощи внешнего скрипта
+# в качестве имени проекта используется имя текущей директории
+. common
+echo building $PROJECT_NAME : $VERSION
+docker buildx use default
+docker buildx build --load --platform linux/amd64 --progress=plain -t $PROJECT_NAME .
+docker tag $PROJECT_NAME 192.168.192.42:5000/$PROJECT_NAME:$VERSION
+docker push  192.168.192.42:5000/$PROJECT_NAME:$VERSION

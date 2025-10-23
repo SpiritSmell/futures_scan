@@ -1,0 +1,4 @@
+#!/bin/bash
+. common
+docker run --rm -e config=./data/z_i_materialstock_v1_1.cfg -v $PWD/data:/app/data 192.168.192.42:5000/$PROJECT_NAME:$VERSION
+

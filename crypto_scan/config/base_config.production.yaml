@@ -1,0 +1,68 @@
+# Production Environment Configuration Override
+environment: production
+debug: false
+
+# Production logging settings
+logging:
+  level: "WARNING"
+  file_enabled: true
+  file_path: "/var/log/crypto_collector/crypto_collector.log"
+  console_enabled: false
+  max_file_size: 500
+  backup_count: 10
+
+# Production performance settings
+performance:
+  enable_metrics: true
+  metrics_interval: 30.0
+  enable_profiling: false
+  max_memory_usage: 4096
+  max_cpu_usage: 70.0
+
+# Production intervals (more frequent)
+ticker_interval: 15.0
+funding_rate_interval: 180.0
+
+# Production cache settings (larger)
+cache:
+  enabled: true
+  default_ttl: 600.0
+  max_size: 50000
+  cleanup_interval: 120.0
+
+# Production batch settings (larger batches)
+batch:
+  enabled: true
+  max_size: 500
+  max_wait_time: 2.0
+  strategy: "adaptive"
+  compression_enabled: true
+
+# Production circuit breaker (more aggressive)
+exchange_configs:
+  binance:
+    circuit_breaker:
+      failure_threshold: 3
+      recovery_timeout: 30.0
+      success_threshold: 2
+      timeout: 15.0
+      max_failure_threshold: 10
+      backoff_multiplier: 2.0
+      max_recovery_timeout: 180.0
+    retry:
+      max_attempts: 5
+      base_delay: 0.5
+      max_delay: 15.0
+      strategy: "exponential"
+    health_check:
+      check_interval: 60.0
+      timeout: 15.0
+      failure_threshold: 2
+      recovery_threshold: 1
+
+# Production RabbitMQ (use environment variables)
+rabbitmq:
+  host: "${RABBITMQ_HOST}"
+  port: "${RABBITMQ_PORT}"
+  user: "${RABBITMQ_USER}"
+  password: "${RABBITMQ_PASSWORD}"

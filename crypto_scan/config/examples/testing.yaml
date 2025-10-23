@@ -1,0 +1,133 @@
+# 🧪 Testing Configuration Example
+# Crypto Futures Price Collector v5 - Testing Environment
+
+# Testing mode with debug enabled
+debug: true
+
+# Logging configuration for testing
+logging:
+  level: DEBUG
+  console: true
+  file: true
+  file_path: "./logs/test_collector.log"
+  max_file_size: 5242880  # 5MB
+  backup_count: 2
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+
+# Fast intervals for testing
+ticker_interval: 5.0
+funding_rate_interval: 30.0
+
+# Exchange configurations for testing (with mocks)
+exchange_configs:
+  binance:
+    enabled: true
+    timeout: 10.0
+    rate_limit: 1200
+    api_key: "test_api_key"
+    api_secret: "test_api_secret"
+    sandbox: true
+    testnet: true
+  
+  bybit:
+    enabled: true
+    timeout: 10.0
+    rate_limit: 600
+    api_key: "test_api_key"
+    api_secret: "test_api_secret"
+    sandbox: true
+    testnet: true
+
+# Performance settings for testing (minimal)
+performance:
+  max_concurrent_requests: 5
+  worker_threads: 1
+  connection_pool_size: 2
+  request_timeout: 10.0
+  max_retries: 2
+  retry_delay: 0.5
+
+# Cache settings for testing (small cache)
+cache:
+  enabled: true
+  max_size: 100
+  default_ttl: 30.0
+  cleanup_interval: 60.0
+
+# Circuit breaker settings (quick failure for testing)
+circuit_breaker:
+  failure_threshold: 3
+  recovery_timeout: 10.0
+  expected_exception_types:
+    - "ccxt.NetworkError"
+    - "ccxt.ExchangeError"
+    - "ccxt.RequestTimeout"
+
+# Retry configuration for testing (fast retries)
+retry:
+  max_attempts: 2
+  base_delay: 0.5
+  max_delay: 5.0
+  exponential_base: 2.0
+  jitter: false
+
+# Health monitoring for testing (frequent checks)
+health:
+  check_interval: 10.0
+  timeout: 5.0
+  max_failures: 2
+
+# RabbitMQ configuration for testing (in-memory)
+rabbitmq:
+  host: "localhost"
+  port: 5672
+  username: "test"
+  password: "test"
+  virtual_host: "/test"
+  exchange: "crypto_test"
+  routing_key: "futures.test"
+  queue: "crypto_futures_test"
+  durable: false
+  auto_delete: true
+
+# Database configuration for testing (in-memory)
+database:
+  type: "sqlite"
+  host: ":memory:"
+  database: "test_crypto"
+  timeout: 10.0
+  connection_pool_size: 2
+
+# Batch processing for testing (small batches)
+batch_processing:
+  enabled: true
+  batch_size: 10
+  flush_interval: 5.0
+  max_batch_age: 10.0
+
+# Monitoring configuration for testing
+monitoring:
+  enabled: true
+  metrics_interval: 10.0
+  health_check_port: 8081
+  prometheus_metrics: false
+
+# Data validation for testing (strict)
+data_validation:
+  enabled: true
+  strict_mode: true
+  required_fields:
+    - "symbol"
+    - "timestamp"
+    - "price"
+  
+# Testing-specific features
+testing:
+  mock_exchanges: true
+  simulate_errors: true
+  error_rate: 0.1  # 10% error rate for testing
+  slow_response_rate: 0.05  # 5% slow responses
+  log_all_requests: true
+  save_raw_responses: false
+  deterministic_responses: true
+  test_data_path: "./tests/data"

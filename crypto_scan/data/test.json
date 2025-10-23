@@ -1,0 +1,209 @@
+{
+    "binance": {
+        "AGLD": {
+            "id": "AGLD",
+            "name": "Adventure Gold",
+            "code": "AGLD",
+            "precision": 8,
+            "info": {
+                "coin": "AGLD",
+                "depositAllEnable": true,
+                "withdrawAllEnable": true,
+                "name": "Adventure Gold",
+                "free": "0",
+                "locked": "0",
+                "freeze": "0",
+                "withdrawing": "0",
+                "ipoing": "0",
+                "ipoable": "0",
+                "storage": "0",
+                "isLegalMoney": false,
+                "trading": true,
+                "networkList": [
+                    {
+                        "network": "ETH",
+                        "coin": "AGLD",
+                        "withdrawIntegerMultiple": "0.00000001",
+                        "isDefault": true,
+                        "depositEnable": true,
+                        "withdrawEnable": true,
+                        "depositDesc": "",
+                        "withdrawDesc": "",
+                        "specialTips": "",
+                        "specialWithdrawTips": "",
+                        "name": "Ethereum (ERC20)",
+                        "resetAddressStatus": false,
+                        "addressRegex": "^(0x)[0-9A-Fa-f]{40}$",
+                        "memoRegex": "",
+                        "withdrawFee": "6.06",
+                        "withdrawMin": "12",
+                        "withdrawMax": "9999999",
+                        "depositDust": "0.0012",
+                        "minConfirm": "6",
+                        "unLockConfirm": "64",
+                        "sameAddress": false,
+                        "estimatedArrivalTime": "3",
+                        "busy": false,
+                        "contractAddressUrl": "https://etherscan.io/address/",
+                        "contractAddress": "0x32353a6c91143bfd6c7d363b546e62a9a2489a20"
+                    }
+                ]
+            },
+            "active": true,
+            "deposit": true,
+            "withdraw": true,
+            "networks": {
+                "ERC20": {
+                    "info": {
+                        "network": "ETH",
+                        "coin": "AGLD",
+                        "withdrawIntegerMultiple": "0.00000001",
+                        "isDefault": true,
+                        "depositEnable": true,
+                        "withdrawEnable": true,
+                        "depositDesc": "",
+                        "withdrawDesc": "",
+                        "specialTips": "",
+                        "specialWithdrawTips": "",
+                        "name": "Ethereum (ERC20)",
+                        "resetAddressStatus": false,
+                        "addressRegex": "^(0x)[0-9A-Fa-f]{40}$",
+                        "memoRegex": "",
+                        "withdrawFee": "6.06",
+                        "withdrawMin": "12",
+                        "withdrawMax": "9999999",
+                        "depositDust": "0.0012",
+                        "minConfirm": "6",
+                        "unLockConfirm": "64",
+                        "sameAddress": false,
+                        "estimatedArrivalTime": "3",
+                        "busy": false,
+                        "contractAddressUrl": "https://etherscan.io/address/",
+                        "contractAddress": "0x32353a6c91143bfd6c7d363b546e62a9a2489a20"
+                    },
+                    "id": "ETH",
+                    "network": "ERC20",
+                    "active": true,
+                    "deposit": true,
+                    "withdraw": true,
+                    "fee": 6.06,
+                    "precision": "0.00000001",
+                    "limits": {
+                        "withdraw": {
+                            "min": 12.0,
+                            "max": 9999999.0
+                        },
+                        "deposit": {
+                            "min": null,
+                            "max": null
+                        }
+                    }
+                }
+            },
+            "fee": 6.06,
+            "fees": {
+                "ETH": 6.06
+            },
+            "limits": {
+                "leverage": {
+                    "min": null,
+                    "max": null
+                },
+                "amount": {
+                    "min": null,
+                    "max": null
+                },
+                "price": {
+                    "min": null,
+                    "max": null
+                },
+                "cost": {
+                    "min": null,
+                    "max": null
+                }
+            }
+        }
+    },
+    "mexc": {
+        "CATCHOLD": {
+            "info": {
+                "coin": "CATCHOLD",
+                "name": "SpaceCatch",
+                "networkList": [
+                    {
+                        "coin": "CATCHOLD",
+                        "depositDesc": "Deposit is prohibited (forced deposit may result in asset loss)",
+                        "depositEnable": false,
+                        "minConfirm": "100",
+                        "name": "SpaceCatch",
+                        "network": "Arbitrum One(ARB)",
+                        "withdrawEnable": true,
+                        "withdrawFee": "0",
+                        "withdrawIntegerMultiple": null,
+                        "withdrawMax": "100000",
+                        "withdrawMin": "1",
+                        "sameAddress": false,
+                        "contract": "0xf0a479C9c3378638EC603b8B6B0d75903902550B",
+                        "withdrawTips": null,
+                        "depositTips": null,
+                        "netWork": "ARB"
+                    }
+                ]
+            },
+            "id": "CATCHOLD",
+            "code": "CATCHOLD",
+            "name": "SpaceCatch",
+            "active": false,
+            "deposit": false,
+            "withdraw": true,
+            "fee": 0.0,
+            "precision": null,
+            "limits": {
+                "amount": {
+                    "min": null,
+                    "max": null
+                },
+                "withdraw": {
+                    "min": "1",
+                    "max": "100000"
+                }
+            },
+            "networks": {
+                "ARB": {
+                    "info": {
+                        "coin": "CATCHOLD",
+                        "depositDesc": "Deposit is prohibited (forced deposit may result in asset loss)",
+                        "depositEnable": false,
+                        "minConfirm": "100",
+                        "name": "SpaceCatch",
+                        "network": "Arbitrum One(ARB)",
+                        "withdrawEnable": true,
+                        "withdrawFee": "0",
+                        "withdrawIntegerMultiple": null,
+                        "withdrawMax": "100000",
+                        "withdrawMin": "1",
+                        "sameAddress": false,
+                        "contract": "0xf0a479C9c3378638EC603b8B6B0d75903902550B",
+                        "withdrawTips": null,
+                        "depositTips": null,
+                        "netWork": "ARB"
+                    },
+                    "id": "Arbitrum One(ARB)",
+                    "network": "ARB",
+                    "active": false,
+                    "deposit": false,
+                    "withdraw": true,
+                    "fee": 0.0,
+                    "precision": null,
+                    "limits": {
+                        "withdraw": {
+                            "min": "1",
+                            "max": "100000"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

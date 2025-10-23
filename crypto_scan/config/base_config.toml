@@ -1,0 +1,153 @@
+# Crypto Futures Collector v5 Configuration (TOML format)
+
+environment = "development"
+debug = true
+app_name = "Crypto Futures Collector v5"
+version = "5.0.0"
+
+exchanges = ["binance", "bybit", "bitget", "htx", "gateio"]
+
+ticker_interval = 30.0
+funding_rate_interval = 300.0
+enable_change_detection = true
+
+[cache]
+enabled = true
+default_ttl = 300.0
+max_size = 10000
+cleanup_interval = 60.0
+
+[batch]
+enabled = true
+max_size = 100
+max_wait_time = 5.0
+strategy = "size_based"
+compression_enabled = true
+
+[rabbitmq]
+host = "192.168.192.42"
+port = 5672
+user = "rmuser"
+password = "rmpassword"
+vhost = "/"
+exchange = "futures_price_collector"
+out_exchange = "futures_price_collector_out"
+
+[database]
+enabled = false
+host = "localhost"
+port = 9000
+database = "crypto_data"
+user = "default"
+password = ""
+
+[performance]
+enable_metrics = true
+metrics_interval = 60.0
+enable_profiling = false
+max_memory_usage = 2048
+max_cpu_usage = 80.0
+
+[logging]
+level = "INFO"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+file_enabled = true
+file_path = "logs/crypto_collector.log"
+console_enabled = true
+max_file_size = 100
+backup_count = 5
+
+[exchange_configs.binance]
+name = "binance"
+enabled = true
+timeout = 30.0
+rate_limit = 1200
+sandbox = false
+
+[exchange_configs.binance.circuit_breaker]
+failure_threshold = 5
+recovery_timeout = 60.0
+success_threshold = 3
+timeout = 30.0
+max_failure_threshold = 15
+backoff_multiplier = 1.5
+max_recovery_timeout = 300.0
+
+[exchange_configs.binance.retry]
+max_attempts = 3
+base_delay = 1.0
+max_delay = 30.0
+strategy = "adaptive"
+backoff_multiplier = 2.0
+jitter = true
+
+[exchange_configs.binance.health_check]
+check_interval = 120.0
+timeout = 30.0
+failure_threshold = 3
+recovery_threshold = 2
+adaptive_scaling = true
+
+[exchange_configs.bybit]
+name = "bybit"
+enabled = true
+timeout = 30.0
+rate_limit = 600
+sandbox = false
+
+[exchange_configs.bybit.circuit_breaker]
+failure_threshold = 5
+recovery_timeout = 60.0
+success_threshold = 3
+timeout = 30.0
+
+[exchange_configs.bybit.retry]
+max_attempts = 3
+base_delay = 1.0
+max_delay = 30.0
+strategy = "adaptive"
+
+[exchange_configs.bybit.health_check]
+check_interval = 120.0
+timeout = 30.0
+failure_threshold = 3
+recovery_threshold = 2
+
+[exchange_configs.bitget]
+name = "bitget"
+enabled = true
+timeout = 30.0
+rate_limit = 600
+sandbox = false
+
+[exchange_configs.htx]
+name = "htx"
+enabled = true
+timeout = 30.0
+sandbox = false
+
+[exchange_configs.gateio]
+name = "gateio"
+enabled = true
+timeout = 30.0
+sandbox = false
+
+[api_keys.binance]
+apiKey = ""
+secret = ""
+
+[api_keys.bybit]
+apiKey = ""
+secret = ""
+
+[api_keys.bitget]
+apiKey = ""
+secret = ""
+
+[api_keys.htx]
+apiKey = ""
+secret = ""
+
+[api_keys.gateio]
+apiKey = ""
+secret = ""

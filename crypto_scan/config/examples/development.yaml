@@ -1,0 +1,135 @@
+# 🔧 Development Configuration Example
+# Crypto Futures Price Collector v5 - Development Environment
+
+# Debug mode for development
+debug: true
+
+# Logging configuration for development
+logging:
+  level: DEBUG
+  console: true
+  file: true
+  file_path: "./logs/dev_collector.log"
+  max_file_size: 10485760  # 10MB
+  backup_count: 3
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Development intervals (faster for testing)
+ticker_interval: 30.0
+funding_rate_interval: 300.0
+
+# Exchange configurations for development
+exchange_configs:
+  binance:
+    enabled: true
+    timeout: 30.0
+    rate_limit: 1200
+    api_key: "${CRYPTO_COLLECTOR_BINANCE_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_BINANCE_API_SECRET}"
+    sandbox: false
+    testnet: false
+  
+  bybit:
+    enabled: true
+    timeout: 30.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_BYBIT_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_BYBIT_API_SECRET}"
+    sandbox: false
+    testnet: false
+
+# Performance settings for development (lower values)
+performance:
+  max_concurrent_requests: 10
+  worker_threads: 2
+  connection_pool_size: 5
+  request_timeout: 30.0
+  max_retries: 3
+  retry_delay: 1.0
+
+# Cache settings for development
+cache:
+  enabled: true
+  max_size: 1000
+  default_ttl: 60.0
+  cleanup_interval: 300.0
+
+# Circuit breaker settings (more lenient for development)
+circuit_breaker:
+  failure_threshold: 10
+  recovery_timeout: 30.0
+  expected_exception_types:
+    - "ccxt.NetworkError"
+    - "ccxt.ExchangeError"
+    - "ccxt.RequestTimeout"
+
+# Retry configuration for development
+retry:
+  max_attempts: 3
+  base_delay: 1.0
+  max_delay: 10.0
+  exponential_base: 2.0
+  jitter: true
+
+# Health monitoring (frequent checks for development)
+health:
+  check_interval: 30.0
+  timeout: 10.0
+  max_failures: 3
+
+# RabbitMQ configuration for development (local)
+rabbitmq:
+  host: "localhost"
+  port: 5672
+  username: "guest"
+  password: "guest"
+  virtual_host: "/"
+  exchange: "crypto_dev"
+  routing_key: "futures.dev"
+  queue: "crypto_futures_dev"
+  durable: false
+  auto_delete: true
+
+# Database configuration for development (local)
+database:
+  type: "clickhouse"
+  host: "localhost"
+  port: 8123
+  database: "crypto_dev"
+  username: "default"
+  password: ""
+  timeout: 30.0
+  connection_pool_size: 5
+
+# Batch processing for development (smaller batches)
+batch_processing:
+  enabled: true
+  batch_size: 100
+  flush_interval: 10.0
+  max_batch_age: 30.0
+
+# Monitoring configuration for development
+monitoring:
+  enabled: true
+  metrics_interval: 60.0
+  health_check_port: 8080
+  prometheus_metrics: false
+
+# Data validation (strict for development)
+data_validation:
+  enabled: true
+  strict_mode: true
+  required_fields:
+    - "symbol"
+    - "timestamp"
+    - "price"
+  
+# Development-specific features
+development:
+  mock_exchanges: false
+  simulate_errors: false
+  error_rate: 0.0
+  slow_response_rate: 0.0
+  log_all_requests: true
+  save_raw_responses: true
+  response_cache_dir: "./cache/responses"

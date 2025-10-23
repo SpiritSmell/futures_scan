@@ -1,0 +1,175 @@
+# 🚀 Production Configuration Example
+# Crypto Futures Price Collector v5 - Production Environment
+
+# Production mode (debug disabled)
+debug: false
+
+# Logging configuration for production
+logging:
+  level: INFO
+  console: false
+  file: true
+  file_path: "/var/log/crypto_collector/collector.log"
+  max_file_size: 104857600  # 100MB
+  backup_count: 10
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+
+# Production intervals (optimized for performance)
+ticker_interval: 60.0
+funding_rate_interval: 600.0
+
+# Exchange configurations for production
+exchange_configs:
+  binance:
+    enabled: true
+    timeout: 45.0
+    rate_limit: 1200
+    api_key: "${CRYPTO_COLLECTOR_BINANCE_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_BINANCE_API_SECRET}"
+    sandbox: false
+    testnet: false
+  
+  bybit:
+    enabled: true
+    timeout: 45.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_BYBIT_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_BYBIT_API_SECRET}"
+    sandbox: false
+    testnet: false
+  
+  okx:
+    enabled: true
+    timeout: 45.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_OKX_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_OKX_API_SECRET}"
+    passphrase: "${CRYPTO_COLLECTOR_OKX_PASSPHRASE}"
+    sandbox: false
+    testnet: false
+
+# Performance settings for production (optimized)
+performance:
+  max_concurrent_requests: 50
+  worker_threads: 4
+  connection_pool_size: 20
+  request_timeout: 45.0
+  max_retries: 5
+  retry_delay: 2.0
+
+# Cache settings for production (larger cache)
+cache:
+  enabled: true
+  max_size: 10000
+  default_ttl: 300.0
+  cleanup_interval: 600.0
+
+# Circuit breaker settings (production-ready)
+circuit_breaker:
+  failure_threshold: 5
+  recovery_timeout: 60.0
+  expected_exception_types:
+    - "ccxt.NetworkError"
+    - "ccxt.ExchangeError"
+    - "ccxt.RequestTimeout"
+    - "ccxt.RateLimitExceeded"
+
+# Retry configuration for production
+retry:
+  max_attempts: 5
+  base_delay: 2.0
+  max_delay: 60.0
+  exponential_base: 2.0
+  jitter: true
+
+# Health monitoring for production
+health:
+  check_interval: 60.0
+  timeout: 30.0
+  max_failures: 3
+
+# RabbitMQ configuration for production
+rabbitmq:
+  host: "${CRYPTO_COLLECTOR_RABBITMQ_HOST}"
+  port: 5672
+  username: "${CRYPTO_COLLECTOR_RABBITMQ_USER}"
+  password: "${CRYPTO_COLLECTOR_RABBITMQ_PASS}"
+  virtual_host: "${CRYPTO_COLLECTOR_RABBITMQ_VHOST}"
+  exchange: "crypto_production"
+  routing_key: "futures.production"
+  queue: "crypto_futures_production"
+  durable: true
+  auto_delete: false
+  ssl_enabled: true
+  ssl_verify: true
+
+# Database configuration for production
+database:
+  type: "clickhouse"
+  host: "${CRYPTO_COLLECTOR_DB_HOST}"
+  port: 8123
+  database: "${CRYPTO_COLLECTOR_DB_NAME}"
+  username: "${CRYPTO_COLLECTOR_DB_USER}"
+  password: "${CRYPTO_COLLECTOR_DB_PASS}"
+  timeout: 60.0
+  connection_pool_size: 20
+  ssl_enabled: true
+  ssl_verify: true
+
+# Batch processing for production (optimized)
+batch_processing:
+  enabled: true
+  batch_size: 1000
+  flush_interval: 30.0
+  max_batch_age: 120.0
+
+# Monitoring configuration for production
+monitoring:
+  enabled: true
+  metrics_interval: 300.0
+  health_check_port: 8080
+  prometheus_metrics: true
+  prometheus_port: 9090
+
+# Data validation for production
+data_validation:
+  enabled: true
+  strict_mode: false
+  required_fields:
+    - "symbol"
+    - "timestamp"
+    - "price"
+  
+# Security settings for production
+security:
+  encrypt_sensitive_data: true
+  api_key_rotation_days: 90
+  log_sensitive_data: false
+  rate_limit_per_ip: 1000
+
+# Backup and recovery
+backup:
+  enabled: true
+  interval: 3600.0  # 1 hour
+  retention_days: 30
+  backup_path: "/var/backups/crypto_collector"
+  compress: true
+
+# Alerting configuration
+alerting:
+  enabled: true
+  email_notifications: true
+  smtp_host: "${CRYPTO_COLLECTOR_SMTP_HOST}"
+  smtp_port: 587
+  smtp_user: "${CRYPTO_COLLECTOR_SMTP_USER}"
+  smtp_pass: "${CRYPTO_COLLECTOR_SMTP_PASS}"
+  alert_recipients:
+    - "admin@company.com"
+    - "devops@company.com"
+  
+  # Alert thresholds
+  thresholds:
+    error_rate: 0.05  # 5%
+    response_time: 5.0  # 5 seconds
+    memory_usage: 0.80  # 80%
+    cpu_usage: 0.75  # 75%

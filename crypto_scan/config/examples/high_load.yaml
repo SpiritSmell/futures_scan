@@ -1,0 +1,225 @@
+# ⚡ High Load Configuration Example
+# Crypto Futures Price Collector v5 - High Performance Environment
+
+# Production mode optimized for high load
+debug: false
+
+# Logging configuration for high load (minimal logging)
+logging:
+  level: WARNING
+  console: false
+  file: true
+  file_path: "/var/log/crypto_collector/high_load.log"
+  max_file_size: 209715200  # 200MB
+  backup_count: 5
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+
+# Optimized intervals for high throughput
+ticker_interval: 30.0
+funding_rate_interval: 300.0
+
+# Exchange configurations for high load (all major exchanges)
+exchange_configs:
+  binance:
+    enabled: true
+    timeout: 60.0
+    rate_limit: 1200
+    api_key: "${CRYPTO_COLLECTOR_BINANCE_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_BINANCE_API_SECRET}"
+    sandbox: false
+    testnet: false
+  
+  bybit:
+    enabled: true
+    timeout: 60.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_BYBIT_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_BYBIT_API_SECRET}"
+    sandbox: false
+    testnet: false
+  
+  okx:
+    enabled: true
+    timeout: 60.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_OKX_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_OKX_API_SECRET}"
+    passphrase: "${CRYPTO_COLLECTOR_OKX_PASSPHRASE}"
+    sandbox: false
+    testnet: false
+  
+  huobi:
+    enabled: true
+    timeout: 60.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_HUOBI_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_HUOBI_API_SECRET}"
+    sandbox: false
+    testnet: false
+  
+  kucoin:
+    enabled: true
+    timeout: 60.0
+    rate_limit: 600
+    api_key: "${CRYPTO_COLLECTOR_KUCOIN_API_KEY}"
+    api_secret: "${CRYPTO_COLLECTOR_KUCOIN_API_SECRET}"
+    passphrase: "${CRYPTO_COLLECTOR_KUCOIN_PASSPHRASE}"
+    sandbox: false
+    testnet: false
+
+# Performance settings optimized for high load
+performance:
+  max_concurrent_requests: 100
+  worker_threads: 8
+  connection_pool_size: 50
+  request_timeout: 60.0
+  max_retries: 3
+  retry_delay: 1.0
+  keep_alive: true
+  connection_reuse: true
+
+# Large cache for high load
+cache:
+  enabled: true
+  max_size: 50000
+  default_ttl: 600.0
+  cleanup_interval: 300.0
+  cache_hit_ratio_target: 0.8
+
+# Circuit breaker settings for high load
+circuit_breaker:
+  failure_threshold: 10
+  recovery_timeout: 120.0
+  expected_exception_types:
+    - "ccxt.NetworkError"
+    - "ccxt.ExchangeError"
+    - "ccxt.RequestTimeout"
+    - "ccxt.RateLimitExceeded"
+
+# Retry configuration optimized for high load
+retry:
+  max_attempts: 3
+  base_delay: 1.0
+  max_delay: 30.0
+  exponential_base: 2.0
+  jitter: true
+
+# Health monitoring for high load
+health:
+  check_interval: 120.0
+  timeout: 30.0
+  max_failures: 5
+
+# RabbitMQ configuration for high load (clustered)
+rabbitmq:
+  hosts:
+    - "${CRYPTO_COLLECTOR_RABBITMQ_HOST1}"
+    - "${CRYPTO_COLLECTOR_RABBITMQ_HOST2}"
+    - "${CRYPTO_COLLECTOR_RABBITMQ_HOST3}"
+  port: 5672
+  username: "${CRYPTO_COLLECTOR_RABBITMQ_USER}"
+  password: "${CRYPTO_COLLECTOR_RABBITMQ_PASS}"
+  virtual_host: "${CRYPTO_COLLECTOR_RABBITMQ_VHOST}"
+  exchange: "crypto_high_load"
+  routing_key: "futures.high_load"
+  queue: "crypto_futures_high_load"
+  durable: true
+  auto_delete: false
+  ssl_enabled: true
+  ssl_verify: true
+  connection_pool_size: 20
+  channel_pool_size: 50
+  prefetch_count: 1000
+
+# Database configuration for high load (sharded)
+database:
+  type: "clickhouse"
+  hosts:
+    - "${CRYPTO_COLLECTOR_DB_HOST1}"
+    - "${CRYPTO_COLLECTOR_DB_HOST2}"
+    - "${CRYPTO_COLLECTOR_DB_HOST3}"
+  port: 8123
+  database: "${CRYPTO_COLLECTOR_DB_NAME}"
+  username: "${CRYPTO_COLLECTOR_DB_USER}"
+  password: "${CRYPTO_COLLECTOR_DB_PASS}"
+  timeout: 60.0
+  connection_pool_size: 50
+  ssl_enabled: true
+  ssl_verify: true
+  compression: true
+  insert_block_size: 1000000
+
+# Batch processing optimized for high load
+batch_processing:
+  enabled: true
+  batch_size: 5000
+  flush_interval: 15.0
+  max_batch_age: 60.0
+  parallel_batches: 4
+  compression_enabled: true
+
+# Monitoring configuration for high load
+monitoring:
+  enabled: true
+  metrics_interval: 60.0
+  health_check_port: 8080
+  prometheus_metrics: true
+  prometheus_port: 9090
+  detailed_metrics: false  # Reduce overhead
+
+# Data validation optimized for high load
+data_validation:
+  enabled: true
+  strict_mode: false
+  required_fields:
+    - "symbol"
+    - "timestamp"
+    - "price"
+  async_validation: true
+  
+# Memory management for high load
+memory:
+  gc_threshold: 0.8
+  gc_interval: 300.0
+  max_memory_usage: 0.85
+  memory_cleanup_aggressive: true
+
+# Network optimization for high load
+network:
+  tcp_keepalive: true
+  tcp_nodelay: true
+  socket_timeout: 60.0
+  max_connections_per_host: 20
+  dns_cache_ttl: 300.0
+
+# High load specific optimizations
+high_load:
+  disable_debug_logging: true
+  minimize_object_creation: true
+  use_connection_pooling: true
+  enable_compression: true
+  optimize_json_parsing: true
+  reduce_memory_allocations: true
+  
+# Resource limits for high load
+limits:
+  max_open_files: 65536
+  max_processes: 32768
+  max_memory_mb: 8192
+  max_cpu_cores: 16
+
+# Scaling configuration
+scaling:
+  auto_scaling_enabled: true
+  min_workers: 4
+  max_workers: 16
+  scale_up_threshold: 0.8
+  scale_down_threshold: 0.3
+  scale_check_interval: 60.0
+
+# Load balancing
+load_balancing:
+  strategy: "round_robin"
+  health_check_interval: 30.0
+  failover_enabled: true
+  sticky_sessions: false
