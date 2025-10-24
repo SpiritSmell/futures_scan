@@ -3,6 +3,7 @@ import logging
 from typing import List
 from utils.config_loader import load_config, load_api_keys
 from utils.logger import setup_logging
+from utils.statistics import Statistics
 from collectors.exchange_collector import ExchangeCollector
 from publishers.rabbitmq_publisher import RabbitMQPublisher
 
@@ -14,7 +15,8 @@ async def run_exchange_collector(
     publisher: RabbitMQPublisher,
     interval: int,
     retry_attempts: int,
-    retry_delays: List[int]
+    retry_delays: List[int],
+    stats: Statistics
 ):
     """Запускает сборщик для одной биржи"""
     logger = logging.getLogger(exchange_name)
@@ -32,7 +34,14 @@ async def run_exchange_collector(
             for symbol in symbols:
                 data = await collector.collect_futures_data(symbol)
                 if data:
-                    await publisher.publish(data)
+                    stats.record_success(exchange_name)
+                    success = await publisher.publish(data)
+                    if success:
+                        stats.record_published()
+                    else:
+                        stats.record_publish_failed()
+                else:
+                    stats.record_error(exchange_name)
             
             await asyncio.sleep(interval)
     except asyncio.CancelledError:
@@ -44,6 +53,16 @@ async def run_exchange_collector(
             await collector.close()
         except Exception as e:
             logger.debug(f"Error closing {exchange_name}: {e}")
+
+
+async def print_statistics_periodically(stats: Statistics, interval: int = 60):
+    """Выводит статистику каждые N секунд"""
+    try:
+        while True:
+            await asyncio.sleep(interval)
+            stats.print_and_reset()
+    except asyncio.CancelledError:
+        pass
 
 
 async def main():
@@ -75,6 +94,9 @@ async def main():
     )
     await publisher.connect()
     
+    # Создаем объект статистики
+    stats = Statistics()
+    
     # Создаем задачи для каждой биржи
     tasks = []
     for exchange in config.exchanges:
@@ -86,10 +108,15 @@ async def main():
                 publisher,
                 config.collection.interval_seconds,
                 config.collection.retry_attempts,
-                config.collection.retry_delays
+                config.collection.retry_delays,
+                stats
             )
         )
         tasks.append(task)
+    
+    # Добавляем задачу для вывода статистики
+    stats_task = asyncio.create_task(print_statistics_periodically(stats))
+    tasks.append(stats_task)
     
     try:
         # Ждем выполнения всех задач
