@@ -68,10 +68,10 @@
 
 **Цель:** Отправка данных в RabbitMQ
 
-- [ ] Реализовать RabbitMQ publisher (`publishers/rabbitmq_publisher.py`)
-- [ ] Подключиться к RabbitMQ при старте
-- [ ] Отправлять собранные данные в exchange с routing key
-- [ ] Логировать успешную отправку
+- [x] Реализовать RabbitMQ publisher (`publishers/rabbitmq_publisher.py`)
+- [x] Подключиться к RabbitMQ при старте
+- [x] Отправлять собранные данные в exchange с routing key
+- [x] Логировать успешную отправку
 
 **Тест:** Данные появляются в RabbitMQ (проверить через Management UI)
 
