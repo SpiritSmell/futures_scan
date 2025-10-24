@@ -12,11 +12,18 @@ async def run_exchange_collector(
     symbols: List[str],
     api_keys: dict,
     publisher: RabbitMQPublisher,
-    interval: int
+    interval: int,
+    retry_attempts: int,
+    retry_delays: List[int]
 ):
     """Запускает сборщик для одной биржи"""
     logger = logging.getLogger(exchange_name)
-    collector = ExchangeCollector(exchange_name, api_keys.get(exchange_name, {}))
+    collector = ExchangeCollector(
+        exchange_name, 
+        api_keys.get(exchange_name, {}),
+        retry_attempts,
+        retry_delays
+    )
     
     logger.info(f"Starting collector for {exchange_name}")
     
@@ -28,8 +35,15 @@ async def run_exchange_collector(
                     await publisher.publish(data)
             
             await asyncio.sleep(interval)
+    except asyncio.CancelledError:
+        logger.info(f"Collector for {exchange_name} cancelled")
+    except Exception as e:
+        logger.error(f"Unexpected error in {exchange_name}: {e}")
     finally:
-        await collector.close()
+        try:
+            await collector.close()
+        except Exception as e:
+            logger.debug(f"Error closing {exchange_name}: {e}")
 
 
 async def main():
@@ -70,7 +84,9 @@ async def main():
                 config.symbols,
                 api_keys,
                 publisher,
-                config.collection.interval_seconds
+                config.collection.interval_seconds,
+                config.collection.retry_attempts,
+                config.collection.retry_delays
             )
         )
         tasks.append(task)
@@ -80,11 +96,21 @@ async def main():
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:
         logger.info("Shutting down...")
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
     finally:
         # Отменяем все задачи
+        logger.info("Cancelling all tasks...")
         for task in tasks:
-            task.cancel()
+            if not task.done():
+                task.cancel()
+        
+        # Ждем завершения всех задач
+        await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Закрываем соединение с RabbitMQ
         await publisher.close()
+        logger.info("Shutdown complete")
 
 
 if __name__ == "__main__":

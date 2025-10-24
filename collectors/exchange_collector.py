@@ -6,8 +6,8 @@ from models.futures_data import FuturesData, TickerData, OrderbookData
 
 
 class ExchangeCollector(BaseCollector):
-    def __init__(self, exchange_name: str, api_keys: dict):
-        super().__init__(exchange_name, api_keys)
+    def __init__(self, exchange_name: str, api_keys: dict, retry_attempts: int = 3, retry_delays: list = None):
+        super().__init__(exchange_name, api_keys, retry_attempts, retry_delays)
         # Создаем экземпляр биржи через ccxt
         exchange_class = getattr(ccxt, exchange_name)
         self.exchange = exchange_class({
@@ -23,11 +23,11 @@ class ExchangeCollector(BaseCollector):
         try:
             self.logger.debug(f"Fetching data for {symbol}")
             
-            # Получаем ticker
-            ticker = await self.exchange.fetch_ticker(symbol)
+            # Получаем ticker с retry
+            ticker = await self.retry_with_backoff(self.exchange.fetch_ticker, symbol)
             
-            # Получаем orderbook
-            orderbook = await self.exchange.fetch_order_book(symbol)
+            # Получаем orderbook с retry
+            orderbook = await self.retry_with_backoff(self.exchange.fetch_order_book, symbol)
             
             # Получаем bid/ask из orderbook если нет в ticker
             best_bid = ticker.get('bid') or (orderbook['bids'][0][0] if orderbook['bids'] else 0.0)
