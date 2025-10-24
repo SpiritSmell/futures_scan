@@ -1,9 +1,35 @@
 import asyncio
 import logging
+from typing import List
 from utils.config_loader import load_config, load_api_keys
 from utils.logger import setup_logging
 from collectors.exchange_collector import ExchangeCollector
 from publishers.rabbitmq_publisher import RabbitMQPublisher
+
+
+async def run_exchange_collector(
+    exchange_name: str,
+    symbols: List[str],
+    api_keys: dict,
+    publisher: RabbitMQPublisher,
+    interval: int
+):
+    """Запускает сборщик для одной биржи"""
+    logger = logging.getLogger(exchange_name)
+    collector = ExchangeCollector(exchange_name, api_keys.get(exchange_name, {}))
+    
+    logger.info(f"Starting collector for {exchange_name}")
+    
+    try:
+        while True:
+            for symbol in symbols:
+                data = await collector.collect_futures_data(symbol)
+                if data:
+                    await publisher.publish(data)
+            
+            await asyncio.sleep(interval)
+    finally:
+        await collector.close()
 
 
 async def main():
@@ -13,6 +39,9 @@ async def main():
     # Настройка логирования
     setup_logging(config.logging.level, config.logging.file)
     logger = logging.getLogger("main")
+    
+    # Отключаем DEBUG логи от aio_pika
+    logging.getLogger("aio_pika").setLevel(logging.INFO)
     
     logger.info("Futures Data Collector started")
     logger.info(f"Exchanges: {config.exchanges}")
@@ -32,26 +61,29 @@ async def main():
     )
     await publisher.connect()
     
-    # Создаем сборщик для Binance
-    collector = ExchangeCollector("binance", api_keys.get("binance", {}))
-    
-    # Собираем данные для первого символа
-    symbol = config.symbols[0]
-    logger.info(f"Starting collection for {symbol} from Binance")
+    # Создаем задачи для каждой биржи
+    tasks = []
+    for exchange in config.exchanges:
+        task = asyncio.create_task(
+            run_exchange_collector(
+                exchange,
+                config.symbols,
+                api_keys,
+                publisher,
+                config.collection.interval_seconds
+            )
+        )
+        tasks.append(task)
     
     try:
-        while True:
-            data = await collector.collect_futures_data(symbol)
-            if data:
-                # Отправляем в RabbitMQ
-                success = await publisher.publish(data)
-                if success:
-                    logger.info(f"Data sent: bid={data.ticker.bid}, ask={data.ticker.ask}, "
-                               f"funding_rate={data.funding_rate}")
-            
-            await asyncio.sleep(config.collection.interval_seconds)
+        # Ждем выполнения всех задач
+        await asyncio.gather(*tasks)
+    except KeyboardInterrupt:
+        logger.info("Shutting down...")
     finally:
-        await collector.close()
+        # Отменяем все задачи
+        for task in tasks:
+            task.cancel()
         await publisher.close()
 
 
