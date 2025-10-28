@@ -7,20 +7,38 @@ import json
 import sys
 import uuid
 import time
+import os
 import aio_pika
 from aio_pika import Message
+
+
+def load_config():
+    """Загрузить конфигурацию из config.json"""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.json")
+    with open(config_path, 'r') as f:
+        return json.load(f)
 
 
 class ControlClient:
     """Клиент для отправки команд управления"""
     
-    def __init__(self, host="localhost", port=5672, user="guest", password="guest"):
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.control_queue = "futures_collector_control"
-        self.response_exchange = "futures_collector_responses"
+    def __init__(self, host=None, port=None, user=None, password=None):
+        # Если параметры не переданы, читаем из config.json
+        if host is None:
+            config = load_config()
+            self.host = config['rabbitmq']['host']
+            self.port = config['rabbitmq']['port']
+            self.user = config['rabbitmq']['user']
+            self.password = config['rabbitmq']['password']
+            self.control_queue = config['rabbitmq'].get('control_queue', 'futures_collector_control')
+            self.response_exchange = config['rabbitmq'].get('response_exchange', 'futures_collector_responses')
+        else:
+            self.host = host
+            self.port = port
+            self.user = user
+            self.password = password
+            self.control_queue = "futures_collector_control"
+            self.response_exchange = "futures_collector_responses"
     
     async def send_command(self, command_data: dict, timeout: float = 5.0):
         """Отправить команду и дождаться ответа"""
