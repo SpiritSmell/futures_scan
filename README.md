@@ -204,6 +204,112 @@ RabbitMQ: 28 published, 0 failed
 
 Нажмите `Ctrl+C` для graceful shutdown. Все задачи будут корректно завершены.
 
+## Управление через Control API
+
+Приложение поддерживает динамическое управление списком символов через RabbitMQ без перезапуска.
+
+### Доступные команды
+
+#### Добавить символ
+```bash
+python scripts/control_client.py add_symbol "SOL/USDT:USDT"
+```
+
+**Ответ:**
+```
+⏳ Sending command: add_symbol...
+✓ Success: Symbol SOL/USDT:USDT added successfully
+  Current symbols:
+    • BTC/USDT:USDT
+    • ETH/USDT:USDT
+    • SOL/USDT:USDT
+```
+
+#### Удалить символ
+```bash
+python scripts/control_client.py remove_symbol "ETH/USDT:USDT"
+```
+
+#### Заменить весь список
+```bash
+python scripts/control_client.py set_symbols "BTC/USDT:USDT,SOL/USDT:USDT,DOGE/USDT:USDT"
+```
+
+#### Получить текущий список
+```bash
+python scripts/control_client.py get_symbols
+```
+
+**Ответ:**
+```
+⏳ Sending command: get_symbols...
+✓ Success: Symbols retrieved successfully
+  Symbols (2):
+    • BTC/USDT:USDT
+    • ETH/USDT:USDT
+```
+
+#### Получить статистику
+```bash
+python scripts/control_client.py get_statistics
+```
+
+**Ответ:**
+```
+⏳ Sending command: get_statistics...
+✓ Success: Statistics retrieved successfully
+  Statistics:
+    Success: {'binance': 120, 'bybit': 118}
+    Errors: {'htx': 5}
+    RabbitMQ published: 238
+    RabbitMQ failed: 0
+```
+
+### Архитектура Control API
+
+- **Control Queue**: `futures_collector_control` - очередь для входящих команд
+- **Response Exchange**: `futures_collector_responses` - topic exchange для ответов
+- **Correlation ID**: каждая команда получает уникальный ID для связи с ответом
+- **Timeout**: 5 секунд на ожидание ответа
+
+### Коды ошибок
+
+- `invalid_command` - отсутствует обязательное поле
+- `duplicate_symbol` - символ уже существует
+- `symbol_not_found` - символ не найден
+- `unknown_command` - неизвестная команда
+- `timeout` - нет ответа в течение 5 секунд
+
+### Примеры автоматизации
+
+**Python скрипт:**
+```python
+import asyncio
+from scripts.control_client import ControlClient
+
+async def add_multiple_symbols():
+    client = ControlClient()
+    symbols = ["SOL/USDT:USDT", "DOGE/USDT:USDT", "AVAX/USDT:USDT"]
+    
+    for symbol in symbols:
+        response = await client.send_command({
+            "command": "add_symbol",
+            "symbol": symbol
+        })
+        print(f"Added {symbol}: {response['success']}")
+
+asyncio.run(add_multiple_symbols())
+```
+
+**Bash скрипт:**
+```bash
+#!/bin/bash
+# Добавить список символов
+for symbol in "SOL/USDT:USDT" "DOGE/USDT:USDT" "AVAX/USDT:USDT"; do
+    python scripts/control_client.py add_symbol "$symbol"
+done
+```
+
 ## Структура проекта
 
 ```

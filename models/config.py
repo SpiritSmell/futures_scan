@@ -8,6 +8,8 @@ class RabbitMQConfig(BaseModel):
     user: str
     password: str
     exchange: str
+    control_queue: str = "futures_collector_control"
+    response_exchange: str = "futures_collector_responses"
 
 
 class CollectionConfig(BaseModel):

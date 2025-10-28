@@ -4,13 +4,15 @@ from typing import List
 from utils.config_loader import load_config, load_api_keys
 from utils.logger import setup_logging
 from utils.statistics import Statistics
+from utils.shared_state import SharedState
 from collectors.exchange_collector import ExchangeCollector
 from publishers.rabbitmq_publisher import RabbitMQPublisher
+from api.control_listener import ControlListener
 
 
 async def run_exchange_collector(
     exchange_name: str,
-    symbols: List[str],
+    shared_state: SharedState,
     api_keys: dict,
     publisher: RabbitMQPublisher,
     interval: int,
@@ -31,7 +33,10 @@ async def run_exchange_collector(
     
     try:
         while True:
-            for symbol in symbols:
+            # Получаем текущий список символов из shared state
+            current_symbols = await shared_state.get_symbols()
+            
+            for symbol in current_symbols:
                 data = await collector.collect_futures_data(symbol)
                 if data:
                     stats.record_success(exchange_name)
@@ -97,13 +102,30 @@ async def main():
     # Создаем объект статистики
     stats = Statistics()
     
+    # Создаем shared state для управления символами
+    shared_state = SharedState(config.symbols)
+    
+    # Создаем и подключаем control listener
+    control_listener = ControlListener(
+        host=config.rabbitmq.host,
+        port=config.rabbitmq.port,
+        user=config.rabbitmq.user,
+        password=config.rabbitmq.password,
+        control_queue=config.rabbitmq.control_queue,
+        response_exchange=config.rabbitmq.response_exchange,
+        shared_state=shared_state,
+        statistics=stats
+    )
+    await control_listener.connect()
+    await control_listener.start()
+    
     # Создаем задачи для каждой биржи
     tasks = []
     for exchange in config.exchanges:
         task = asyncio.create_task(
             run_exchange_collector(
                 exchange,
-                config.symbols,
+                shared_state,
                 api_keys,
                 publisher,
                 config.collection.interval_seconds,
@@ -135,8 +157,9 @@ async def main():
         # Ждем завершения всех задач
         await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Закрываем соединение с RabbitMQ
+        # Закрываем соединения с RabbitMQ
         await publisher.close()
+        await control_listener.close()
         logger.info("Shutdown complete")
 
 

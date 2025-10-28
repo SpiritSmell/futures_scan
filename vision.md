@@ -301,11 +301,199 @@ RabbitMQ: 35 published, 0 failed
 5. Выводим финальную статистику
 6. Выход
 
-### Сценарий 6: Добавление нового символа
-1. Пользователь редактирует `config.json`
-2. Добавляет новый символ в список
-3. Перезапускает приложение
-4. Приложение начинает собирать данные для нового символа
+### Сценарий 6: Добавление нового символа (через Control API)
+1. Пользователь отправляет команду в RabbitMQ control queue
+2. Control listener получает команду и обновляет список символов
+3. Отправляет ответ с результатом выполнения
+4. Все collectors начинают собирать данные для нового символа без перезапуска
+
+**Альтернатива:** Редактирование `config.json` и перезапуск приложения
+
+---
+
+## 6.5. Control API через RabbitMQ
+
+### Архитектура управления
+- **Control Queue** - очередь для входящих команд управления
+- **Response Exchange** - topic exchange для ответов на команды
+- **Shared State** - разделяемое состояние между всеми collectors
+- **Control Listener** - асинхронная задача для обработки команд
+
+### Control Queue
+- **Имя**: `futures_collector_control`
+- **Тип**: durable queue
+- **Формат сообщений**: JSON
+
+### Response Exchange
+- **Имя**: `futures_collector_responses`
+- **Тип**: topic exchange
+- **Routing key**: `control.response.{command}`
+
+### Поддерживаемые команды
+
+#### 1. add_symbol - Добавить символ
+```json
+{
+  "command": "add_symbol",
+  "symbol": "SOL/USDT:USDT",
+  "correlation_id": "uuid-12345",
+  "timestamp": 1730107603
+}
+```
+
+**Ответ (успех):**
+```json
+{
+  "correlation_id": "uuid-12345",
+  "success": true,
+  "command": "add_symbol",
+  "message": "Symbol SOL/USDT:USDT added successfully",
+  "data": {
+    "symbol": "SOL/USDT:USDT",
+    "current_symbols": ["BTC/USDT:USDT", "ETH/USDT:USDT", "SOL/USDT:USDT"]
+  },
+  "timestamp": 1730107604
+}
+```
+
+**Ответ (ошибка - дубликат):**
+```json
+{
+  "correlation_id": "uuid-12345",
+  "success": false,
+  "command": "add_symbol",
+  "message": "Symbol SOL/USDT:USDT already exists",
+  "error": "duplicate_symbol",
+  "timestamp": 1730107604
+}
+```
+
+#### 2. remove_symbol - Удалить символ
+```json
+{
+  "command": "remove_symbol",
+  "symbol": "ETH/USDT:USDT",
+  "correlation_id": "uuid-12346",
+  "timestamp": 1730107605
+}
+```
+
+**Ответ (успех):**
+```json
+{
+  "correlation_id": "uuid-12346",
+  "success": true,
+  "command": "remove_symbol",
+  "message": "Symbol ETH/USDT:USDT removed successfully",
+  "data": {
+    "symbol": "ETH/USDT:USDT",
+    "current_symbols": ["BTC/USDT:USDT", "SOL/USDT:USDT"]
+  },
+  "timestamp": 1730107606
+}
+```
+
+#### 3. set_symbols - Заменить весь список
+```json
+{
+  "command": "set_symbols",
+  "symbols": ["BTC/USDT:USDT", "SOL/USDT:USDT", "DOGE/USDT:USDT"],
+  "correlation_id": "uuid-12347",
+  "timestamp": 1730107607
+}
+```
+
+#### 4. get_symbols - Получить текущий список
+```json
+{
+  "command": "get_symbols",
+  "correlation_id": "uuid-12348",
+  "timestamp": 1730107608
+}
+```
+
+**Ответ:**
+```json
+{
+  "correlation_id": "uuid-12348",
+  "success": true,
+  "command": "get_symbols",
+  "message": "Symbols retrieved successfully",
+  "data": {
+    "symbols": ["BTC/USDT:USDT", "ETH/USDT:USDT"],
+    "count": 2
+  },
+  "timestamp": 1730107609
+}
+```
+
+#### 5. get_statistics - Получить статистику
+```json
+{
+  "command": "get_statistics",
+  "correlation_id": "uuid-12349",
+  "timestamp": 1730107610
+}
+```
+
+**Ответ:**
+```json
+{
+  "correlation_id": "uuid-12349",
+  "success": true,
+  "command": "get_statistics",
+  "message": "Statistics retrieved successfully",
+  "data": {
+    "exchange_success": {"binance": 120, "bybit": 118},
+    "exchange_errors": {"htx": 5},
+    "rabbitmq_published": 238,
+    "rabbitmq_failed": 0
+  },
+  "timestamp": 1730107611
+}
+```
+
+### Коды ошибок
+- `invalid_command` - отсутствует обязательное поле или неверный формат
+- `invalid_json` - невалидный JSON в сообщении
+- `duplicate_symbol` - символ уже существует (add_symbol)
+- `symbol_not_found` - символ не найден (remove_symbol)
+- `unknown_command` - неизвестная команда
+- `internal_error` - внутренняя ошибка сервиса
+- `timeout` - нет ответа в течение заданного времени
+
+### Использование через скрипт
+```bash
+# Добавить символ
+python scripts/control_client.py add_symbol "SOL/USDT:USDT"
+
+# Удалить символ
+python scripts/control_client.py remove_symbol "ETH/USDT:USDT"
+
+# Заменить список
+python scripts/control_client.py set_symbols "BTC/USDT:USDT,SOL/USDT:USDT"
+
+# Получить список
+python scripts/control_client.py get_symbols
+
+# Получить статистику
+python scripts/control_client.py get_statistics
+```
+
+### Принципы Control API
+- **Асинхронность** - команды обрабатываются независимо от collectors
+- **Обратная связь** - каждая команда получает ответ с результатом
+- **Correlation ID** - для связи команды и ответа
+- **Валидация** - все команды валидируются перед выполнением
+- **Логирование** - все команды и ответы логируются
+- **Thread-safe** - использование asyncio.Lock для безопасности
+
+### Что НЕ делаем в MVP
+- ❌ Аутентификация команд
+- ❌ Rate limiting
+- ❌ История команд
+- ❌ Rollback изменений
+- ❌ Batch операции
 
 ---
 
