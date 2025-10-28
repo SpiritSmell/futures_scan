@@ -272,6 +272,152 @@ python scripts/control_client.py get_statistics
 - **Correlation ID**: каждая команда получает уникальный ID для связи с ответом
 - **Timeout**: 5 секунд на ожидание ответа
 
+### Формат сообщений RabbitMQ
+
+#### Отправка команды
+
+**Куда отправлять:** В очередь `futures_collector_control` (direct routing)
+
+**Формат сообщения (JSON):**
+```json
+{
+  "command": "add_symbol",
+  "symbol": "SOL/USDT:USDT",
+  "correlation_id": "unique-uuid-12345",
+  "timestamp": 1730107603
+}
+```
+
+**Обязательные поля:**
+- `command` - название команды (add_symbol, remove_symbol, set_symbols, get_symbols, get_statistics)
+- `correlation_id` - уникальный ID для связи с ответом (UUID)
+- `timestamp` - Unix timestamp
+
+**Дополнительные поля (зависят от команды):**
+- `symbol` - для add_symbol, remove_symbol
+- `symbols` - массив для set_symbols
+
+#### Получение ответа
+
+**Откуда получать:** Из exchange `futures_collector_responses` (topic)
+
+**Routing key:** `control.response.{command}` (например, `control.response.add_symbol`)
+
+**Формат ответа (JSON):**
+```json
+{
+  "correlation_id": "unique-uuid-12345",
+  "success": true,
+  "command": "add_symbol",
+  "message": "Symbol SOL/USDT:USDT added successfully",
+  "error": null,
+  "data": {
+    "symbol": "SOL/USDT:USDT",
+    "current_symbols": ["BTC/USDT:USDT", "ETH/USDT:USDT", "SOL/USDT:USDT"]
+  },
+  "timestamp": 1730107604
+}
+```
+
+**Поля ответа:**
+- `correlation_id` - ID из команды для связи
+- `success` - true/false результат выполнения
+- `command` - название команды
+- `message` - текстовое описание результата
+- `error` - код ошибки (null если успех)
+- `data` - данные результата (зависят от команды)
+- `timestamp` - Unix timestamp ответа
+
+#### Примеры команд
+
+**1. Добавить символ:**
+```json
+{
+  "command": "add_symbol",
+  "symbol": "SOL/USDT:USDT",
+  "correlation_id": "uuid-1",
+  "timestamp": 1730107603
+}
+```
+
+**2. Удалить символ:**
+```json
+{
+  "command": "remove_symbol",
+  "symbol": "ETH/USDT:USDT",
+  "correlation_id": "uuid-2",
+  "timestamp": 1730107604
+}
+```
+
+**3. Заменить весь список:**
+```json
+{
+  "command": "set_symbols",
+  "symbols": ["BTC/USDT:USDT", "SOL/USDT:USDT", "DOGE/USDT:USDT"],
+  "correlation_id": "uuid-3",
+  "timestamp": 1730107605
+}
+```
+
+**4. Получить текущий список:**
+```json
+{
+  "command": "get_symbols",
+  "correlation_id": "uuid-4",
+  "timestamp": 1730107606
+}
+```
+
+**5. Получить статистику:**
+```json
+{
+  "command": "get_statistics",
+  "correlation_id": "uuid-5",
+  "timestamp": 1730107607
+}
+```
+
+#### Отправка через RabbitMQ напрямую
+
+**Python (pika):**
+```python
+import pika
+import json
+import uuid
+import time
+
+# Подключение
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(host='192.168.192.42', port=5672,
+                             credentials=pika.PlainCredentials('rmuser', 'rmpassword'))
+)
+channel = connection.channel()
+
+# Отправка команды
+command = {
+    "command": "add_symbol",
+    "symbol": "SOL/USDT:USDT",
+    "correlation_id": str(uuid.uuid4()),
+    "timestamp": int(time.time())
+}
+
+channel.basic_publish(
+    exchange='',
+    routing_key='futures_collector_control',
+    body=json.dumps(command)
+)
+
+connection.close()
+```
+
+**Bash (rabbitmqadmin):**
+```bash
+rabbitmqadmin publish \
+  routing_key=futures_collector_control \
+  payload='{"command":"add_symbol","symbol":"SOL/USDT:USDT","correlation_id":"uuid-123","timestamp":1730107603}'
+```
+
 ### Коды ошибок
 
 - `invalid_command` - отсутствует обязательное поле
