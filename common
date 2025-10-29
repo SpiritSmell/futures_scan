@@ -5,4 +5,4 @@ full_path=$(pwd)
 
 # Извлекаем название директории из полного пути
 export PROJECT_NAME=$(basename "$full_path")
-export VERSION='0.1.0001'
+export VERSION='0.1.0002'
