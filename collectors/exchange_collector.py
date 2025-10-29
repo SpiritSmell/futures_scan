@@ -18,8 +18,15 @@ class ExchangeCollector(BaseCollector):
         })
         # Отключаем DEBUG логи от ccxt
         self.exchange.logger.setLevel('WARNING')
+        # Кэш недоступных символов (чтобы не повторять запросы)
+        self.unavailable_symbols = set()
     
     async def collect_futures_data(self, symbol: str) -> Optional[FuturesData]:
+        # Проверяем кэш недоступных символов
+        if symbol in self.unavailable_symbols:
+            self.logger.debug(f"Skipping {symbol} (marked as unavailable)")
+            return None
+        
         try:
             self.logger.debug(f"Fetching data for {symbol}")
             
