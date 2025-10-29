@@ -66,7 +66,7 @@ class ExchangeCollector(BaseCollector):
                 orderbook=OrderbookData(
                     bids=orderbook['bids'],
                     asks=orderbook['asks'],
-                    timestamp=orderbook['timestamp']
+                    timestamp=orderbook.get('timestamp')
                 ),
                 funding_rate=funding_rate,
                 next_funding_time=next_funding_time,

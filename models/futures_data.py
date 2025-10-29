@@ -12,7 +12,7 @@ class TickerData(BaseModel):
 class OrderbookData(BaseModel):
     bids: List[List[float]]
     asks: List[List[float]]
-    timestamp: int
+    timestamp: Optional[int] = None
 
 
 class FuturesData(BaseModel):
