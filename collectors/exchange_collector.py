@@ -84,7 +84,13 @@ class ExchangeCollector(BaseCollector):
             return futures_data
             
         except Exception as e:
-            self.logger.error(f"Failed to collect {symbol}: {e}")
+            error_msg = str(e)
+            # Проверяем, является ли ошибка "символ не найден"
+            if "does not have market symbol" in error_msg or "symbol not found" in error_msg.lower():
+                self.logger.warning(f"Symbol {symbol} not available on {self.exchange_name}, marking as unavailable")
+                self.unavailable_symbols.add(symbol)
+            else:
+                self.logger.error(f"Failed to collect {symbol}: {e}")
             return None
     
     async def close(self):
